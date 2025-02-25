@@ -22,3 +22,7 @@ class CacheFailure extends Failure {
 class NetworkFailure extends Failure {
   const NetworkFailure({required String message}) : super(message: message);
 }
+
+class AIFailure extends Failure {
+  const AIFailure({String message = 'AI Service Error'}) : super(message: message);
+}

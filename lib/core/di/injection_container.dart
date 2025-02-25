@@ -1,5 +1,5 @@
 import 'package:get_it/get_it.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -48,7 +48,7 @@ Future<void> init() async {
   sl.registerLazySingleton<NewsRemoteDataSource>(
     () => NewsRemoteDataSourceImpl(
       client: sl(),
-      apiKey: dotenv.env['NEWS_API_KEY'] ?? ''
+      apiKey: dotenv.get('NEWS_API_KEY', fallback: '')
     ),
   );
 
@@ -80,7 +80,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => FirebaseService());
 
   // OpenAI
-  OpenAI.apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
+  OpenAI.apiKey = dotenv.get('OPENAI_API_KEY', fallback: '');
   sl.registerLazySingleton<AIService>(
     () => OpenAIServiceImpl(openAI: OpenAI.instance),
   );

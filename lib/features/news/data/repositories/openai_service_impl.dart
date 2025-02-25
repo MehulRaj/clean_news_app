@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:dart_openai/dart_openai.dart';
-import '../../../core/error/failures.dart';
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/article_summary.dart';
 import '../../domain/repositories/ai_service.dart';
 
@@ -17,30 +17,32 @@ class OpenAIServiceImpl implements AIService {
         messages: [
           OpenAIChatCompletionChoiceMessageModel(
             role: OpenAIChatMessageRole.system,
-            content: 'You are a professional news summarizer. Create a concise summary of the following article.',
+            content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(
+              'You are a professional news summarizer. Create a concise summary of the following article.',
+            )],
           ),
           OpenAIChatCompletionChoiceMessageModel(
             role: OpenAIChatMessageRole.user,
-            content: content,
+            content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(content)],
           ),
         ],
       );
 
-      final summary = response.choices.first.message.content;
+      final summary = response.choices.first.message.content?.first.text ?? '';
       final wordCount = summary.split(' ').length;
       final readingTime = wordCount / 200; // Average reading speed: 200 words/minute
 
       return Right(
         ArticleSummary(
           originalContent: content,
-          summary: summary,
+          summary: summary.toString(),
           generatedAt: DateTime.now(),
           wordCount: wordCount,
           readingTime: readingTime,
         ),
       );
     } catch (e) {
-      return Left(AIFailure());
+      return Left(const AIFailure());
     }
   }
 
@@ -55,27 +57,31 @@ class OpenAIServiceImpl implements AIService {
         messages: [
           OpenAIChatCompletionChoiceMessageModel(
             role: OpenAIChatMessageRole.system,
-            content: 'You are a news recommendation system. Based on the user\'s interests and reading history, suggest relevant news categories and topics.',
+            content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(
+              'You are a news recommendation system. Based on the user\'s interests and reading history, suggest relevant news categories and topics.',
+            )],
           ),
           OpenAIChatCompletionChoiceMessageModel(
             role: OpenAIChatMessageRole.user,
-            content: '''
+            content: [OpenAIChatCompletionChoiceMessageContentItemModel.text('''
               User Interests: ${userInterests.join(', ')}
               Recently Read: ${readArticles.join(', ')}
               Suggest 5 most relevant topics or categories for this user.
-            ''',
+            ''')],
           ),
         ],
       );
 
-      final recommendations = response.choices.first.message.content
-          .split('\n')
+      final List<String> recommendations = (response.choices.first.message.content
+          ?.first.text?.split('\n') ?? [])
           .where((line) => line.trim().isNotEmpty)
+          .map((line) => line.trim())
+          .cast<String>()
           .toList();
 
       return Right(recommendations);
     } catch (e) {
-      return Left(AIFailure());
+      return Left(const AIFailure());
     }
   }
 
@@ -90,22 +96,24 @@ class OpenAIServiceImpl implements AIService {
         messages: [
           OpenAIChatCompletionChoiceMessageModel(
             role: OpenAIChatMessageRole.system,
-            content: 'You are a user preference analyzer. Analyze the user\'s reading history and interactions to determine their category preferences.',
+            content: [OpenAIChatCompletionChoiceMessageContentItemModel.text(
+              'You are a user preference analyzer. Analyze the user\'s reading history and interactions to determine their category preferences.',
+            )],
           ),
           OpenAIChatCompletionChoiceMessageModel(
             role: OpenAIChatMessageRole.user,
-            content: '''
+            content: [OpenAIChatCompletionChoiceMessageContentItemModel.text('''
               Read Articles: ${readArticles.join(', ')}
               Interactions: ${interactions.join(', ')}
               Analyze and provide category weights as percentages.
-            ''',
+            ''')],
           ),
         ],
       );
 
       // Parse the response into category weights
       final weights = <String, double>{};
-      final lines = response.choices.first.message.content.split('\n');
+      final lines = response.choices.first.message.content?.first.text?.split('\n') ?? [];
       for (var line in lines) {
         if (line.contains(':')) {
           final parts = line.split(':');
@@ -117,7 +125,7 @@ class OpenAIServiceImpl implements AIService {
 
       return Right(weights);
     } catch (e) {
-      return Left(AIFailure());
+      return Left(const AIFailure());
     }
   }
 }

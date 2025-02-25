@@ -44,7 +44,7 @@ class ModernArticleCard extends StatelessWidget {
                     top: Radius.circular(AppRadius.lg),
                   ),
                   child: CachedNetworkImage(
-                    imageUrl: article.urlToImage ?? '',
+                    imageUrl: article.imageUrl,
                     height: 200,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -96,7 +96,7 @@ class ModernArticleCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ).animate().fadeIn().slideIn(),
+                    ).animate().fadeIn().moveX(),
                   ),
               ],
             ),
@@ -165,7 +165,7 @@ class ModernArticleCard extends StatelessWidget {
           ],
         ),
       ),
-    ).animate().fadeIn().slideIn(duration: const Duration(milliseconds: 500));
+    ).animate().fadeIn().moveX(duration: const Duration(milliseconds: 500));
   }
 
   String _formatDate(DateTime? date) {
