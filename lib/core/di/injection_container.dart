@@ -3,6 +3,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dart_openai/dart_openai.dart';
+import '../firebase/firebase_service.dart';
+import '../premium/premium_manager.dart';
+import '../tts/text_to_speech_service.dart';
+import '../../features/news/data/repositories/openai_service_impl.dart';
+import '../../features/news/domain/repositories/ai_service.dart';
 import '../../features/news/data/datasources/news_local_data_source.dart';
 import '../../features/news/data/datasources/news_remote_data_source.dart';
 import '../../features/news/data/repositories/news_repository_impl.dart';
@@ -69,4 +75,19 @@ Future<void> init() async {
   sl.registerLazySingleton(() => InternetConnectionChecker());
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
+
+  // Firebase
+  sl.registerLazySingleton(() => FirebaseService());
+
+  // OpenAI
+  OpenAI.apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
+  sl.registerLazySingleton<AIService>(
+    () => OpenAIServiceImpl(openAI: OpenAI.instance),
+  );
+
+  // Premium Features
+  sl.registerLazySingleton(() => PremiumManager(sharedPreferences));
+
+  // Text-to-Speech
+  sl.registerLazySingleton(() => TextToSpeechService());
 }
