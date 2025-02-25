@@ -86,6 +86,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## 📫 Contact
 
-Your Name - [@MehulRaj](https://github.com/MehulRaj)
+Mehul Raj - [@MehulRaj](https://github.com/MehulRaj)
 
 Project Link: [https://github.com/MehulRaj/clean_news_app](https://github.com/MehulRaj/clean_news_app)
